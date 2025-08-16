@@ -1,240 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monad NFT Mint</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  body {
-    margin: 0;
-    font-family: 'Inter', sans-serif;
-    background: #0b0b0f;
-    overflow: hidden;
-    color: #fff;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monad NFT</title>
+  <style>
+    /* Reset & Body */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Arial', sans-serif; background: #000; color: #fff; }
 
-  canvas#bgCanvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: -1;
-  }
+    /* Header */
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #6a0dad, #000000);
+      background-size: 400% 400%;
+      animation: gradientAnim 15s ease infinite;
+    }
 
-  .header {
-    position: absolute;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(128,0,255,0.1);
-    backdrop-filter: blur(20px);
-    padding: 15px 40px;
-    border-radius: 30px;
-    box-shadow: 0 12px 35px rgba(128,0,255,0.5);
-    width: 90%;
-    max-width: 900px;
-    z-index: 10;
-  }
+    @keyframes gradientAnim {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-  .header img {
-    height: 60px;
-  }
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 400px;
+      padding: 15px 25px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      background: linear-gradient(135deg, #6a0dad, #000000);
+    }
 
-  .button {
-    background: #8000FF;
-    color: white;
-    padding: 12px 28px;
-    border: none;
-    border-radius: 18px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 15px rgba(128,0,255,0.5);
-  }
+    .logo { height: 50px; object-fit: contain; }
 
-  .button:hover {
-    background: #A64DFF;
-    box-shadow: 0 10px 25px rgba(166,77,255,0.6);
-    transform: translateY(-2px);
-  }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 12px;
+      background: #6a0dad;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-  .mint-card {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0,0,0,0.6);
-    border-radius: 25px;
-    padding: 50px 40px;
-    text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-    backdrop-filter: blur(15px);
-    z-index: 5;
-  }
+    .btn:hover {
+      background: #8b2fff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
 
-  .toast {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #A64DFF;
-    padding: 12px 25px;
-    border-radius: 20px;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.4s ease;
-    font-weight: 600;
-    z-index: 20;
-  }
+    /* Main Content */
+    main { padding: 40px 20px; max-width: 900px; margin: auto; }
 
-  .toast.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-</style>
+    h1 { text-align: center; margin-bottom: 20px; font-size: 2rem; color: #6a0dad; }
+
+    .nft-section { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+      gap: 20px; 
+      margin-top: 30px; 
+    }
+
+    .nft-card { 
+      background: #111; 
+      border-radius: 15px; 
+      padding: 15px; 
+      text-align: center; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      transition: transform 0.2s;
+    }
+
+    .nft-card:hover { transform: translateY(-5px); }
+
+    .nft-card img { width: 100%; border-radius: 12px; }
+  </style>
 </head>
 <body>
 
-<canvas id="bgCanvas"></canvas>
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <img src="monad-logo.svg" alt="Monad Logo" class="logo">
+      <button id="connectWallet" class="btn">Connect Wallet</button>
+    </div>
+  </header>
 
-<div class="header">
-  <img src="assets/monad-logo.png" alt="Monad Logo">
-  <button class="button" id="connectWalletBtn">Connect Wallet</button>
-</div>
+  <!-- Main Section -->
+  <main>
+    <h1>Monad NFT Collection</h1>
+    <p style="text-align:center;">Mint and view your NFTs directly from this page.</p>
 
-<div class="mint-card">
-  <h2>Mint Your Monad NFT</h2>
-  <p>Exclusive NFTs for early supporters. Connect your wallet and mint now.</p>
-  <button class="button" id="mintBtn">Mint NFT</button>
-</div>
+    <div class="nft-section" id="nftSection">
+      <!-- NFT cards will appear here -->
+    </div>
+  </main>
 
-<div class="toast" id="toast">Please connect your wallet first!</div>
+  <!-- Scripts -->
+  <script>
+    const connectBtn = document.getElementById('connectWallet');
+    connectBtn.addEventListener('click', async () => {
+      if (!window.ethereum) {
+        alert("No wallet detected! Please install MetaMask or another wallet.");
+        return;
+      }
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.min.js"></script>
-<script>
-  // Wallet & Mint Logic
-  let walletConnected = false;
-  const connectWalletBtn = document.getElementById('connectWalletBtn');
-  const mintBtn = document.getElementById('mintBtn');
-  const toast = document.getElementById('toast');
-
-  function showToast(message) {
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
-
-  connectWalletBtn.onclick = async () => {
-    if(window.ethereum) {
       try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        walletConnected = true;
-        connectWalletBtn.textContent = "Wallet Connected";
-        showToast("Wallet connected!");
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        alert("Wallet connected: " + accounts[0]);
       } catch (err) {
         console.error(err);
-        showToast("Connection failed.");
+        alert("Failed to connect wallet.");
       }
-    } else {
-      showToast("Please install MetaMask!");
-    }
-  };
-
-  mintBtn.onclick = async () => {
-    if(!walletConnected) {
-      showToast("Connect your wallet first!");
-      return;
-    }
-
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    const contractAddress = "0xd2f1211bb2b2985b2275237be13bce417354d797";
-    const abi = ["function mintNFT(address recipient, string memory tokenURI) public returns (uint256)"];
-    const contract = new ethers.Contract(contractAddress, abi, signer);
-    const metadataURI = "ipfs://bafkreihxdovnixidk2d6nrnhmpjiwfuma2q6s2p4mmfw75tu3mo4ih2rui";
-
-    try {
-      const tx = await contract.mintNFT(await signer.getAddress(), metadataURI);
-      await tx.wait();
-      showToast("NFT minted successfully!");
-    } catch (err) {
-      console.error(err);
-      showToast("Minting failed.");
-    }
-  };
-
-  // Advanced Animated Background
-  const canvas = document.getElementById('bgCanvas');
-  const ctx = canvas.getContext('2d');
-  let w = canvas.width = window.innerWidth;
-  let h = canvas.height = window.innerHeight;
-
-  const particles = [];
-  const particleCount = 80;
-  const maxDistance = 150;
-
-  class Particle {
-    constructor(){
-      this.x = Math.random()*w;
-      this.y = Math.random()*h;
-      this.vx = (Math.random()-0.5)*0.3;
-      this.vy = (Math.random()-0.5)*0.3;
-      this.radius = Math.random()*2+1;
-    }
-    update(){
-      this.x += this.vx;
-      this.y += this.vy;
-      if(this.x<0 || this.x>w) this.vx*=-1;
-      if(this.y<0 || this.y>h) this.vy*=-1;
-    }
-    draw(){
-      ctx.beginPath();
-      ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
-      ctx.fillStyle='rgba(128,0,255,0.6)';
-      ctx.fill();
-    }
-  }
-
-  function connectParticles() {
-    for(let i=0;i<particles.length;i++){
-      for(let j=i+1;j<particles.length;j++){
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx*dx+dy*dy);
-        if(dist < maxDistance){
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(128,0,255,${1 - dist/maxDistance})`;
-          ctx.lineWidth = 0.7;
-          ctx.moveTo(particles[i].x,particles[i].y);
-          ctx.lineTo(particles[j].x,particles[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-  }
-
-  function animate(){
-    ctx.clearRect(0,0,w,h);
-    particles.forEach(p=>{
-      p.update();
-      p.draw();
     });
-    connectParticles();
-    requestAnimationFrame(animate);
-  }
 
-  for(let i=0;i<particleCount;i++) particles.push(new Particle());
-  animate();
+    // Placeholder: Function to render minted NFTs
+    const nftSection = document.getElementById('nftSection');
+    const sampleNFTs = [
+      { name: 'Monad #1', img: 'https://ipfs.io/ipfs/bafkreihxdovnixidk2d6nrnhmpjiwfuma2q6s2p4mmfw75tu3mo4ih2rui' },
+      { name: 'Monad #2', img: 'https://ipfs.io/ipfs/bafkreihxdovnixidk2d6nrnhmpjiwfuma2q6s2p4mmfw75tu3mo4ih2rui' }
+    ];
 
-  window.addEventListener('resize',()=>{
-    w=canvas.width=window.innerWidth;
-    h=canvas.height=window.innerHeight;
-  });
-</script>
+    sampleNFTs.forEach(nft => {
+      const card = document.createElement('div');
+      card.className = 'nft-card';
+      card.innerHTML = `<img src="${nft.img}" alt="${nft.name}"><h3>${nft.name}</h3>`;
+      nftSection.appendChild(card);
+    });
+  </script>
 
 </body>
 </html>
